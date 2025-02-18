@@ -1,8 +1,16 @@
 import User from "../models/user.models.js";
 import bcrypt from "bcrypt";
-import JsonWebTokenError from "jsonwebtoken";
-const generateRefereshToken = () => {};
-const generateAceesToken = () => {};
+import Jwt from "jsonwebtoken";
+const generateRefereshToken = (user) => {
+  return Jwt.sign({ email: user.email }, process.env.REFRESHTOKEN, {
+    expiresIn: "2d",
+  });
+};
+const generateAceesToken = (user) => {
+  return Jwt.sign({ email: user.email }, process.env.REFRESHTOKEN, {
+    expiresIn: "7d",
+  });
+};
 const signUp = async (req, res) => {
   const { fullname, email, password } = req.body;
   if (!fullname)
@@ -34,12 +42,12 @@ const signIn = async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword)
       return res.status(400).json({ message: "Incorrect Password" });
-    const refreshToken = generateRefereshToken();
-    const accessToken = generateAceesToken();
+    const refreshToken = generateRefereshToken(user);
+    const accessToken = generateAceesToken(user);
     res.status(200).json({ message: "Login Successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error Occured" });
   }
 };
 
-export { signUp };
+export { signUp, signIn };
